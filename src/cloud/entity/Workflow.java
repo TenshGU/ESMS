@@ -12,8 +12,8 @@ public class Workflow extends ArrayList<Task> {
     private int maxParallel;
 
     //only used in reading DAX, simulate the data transfer from other job
-    private HashMap<String, TransferData> transferData = new HashMap<String, TransferData>(); //ǰ�᣺ fileName�������Ϊ��ʾ
-    private HashMap<String, Task> nameTaskMapping = new HashMap<String, Task>();
+    private HashMap<String, TransferData> transferData = new HashMap<>();
+    private HashMap<String, Task> nameTaskMapping = new HashMap<>();
 
     public Workflow(String file) {
         super();
@@ -132,7 +132,7 @@ public class Workflow extends ArrayList<Task> {
 
     //the DAXReader
     private class MyDAXReader extends DefaultHandler {
-        private Stack<String> tags = new Stack<String>();
+        private Stack<String> tags = new Stack<>();
         private String childId;
         private Task lastTask;
 
@@ -187,7 +187,7 @@ public class Workflow extends ArrayList<Task> {
         private String name;
         private long size;
         private Task source; //used to bind control flow and data flow
-        private List<Task> destinations = new ArrayList<Task>();
+        private List<Task> destinations = new ArrayList<>();
 
         public TransferData(String name, long size) {
             this.name = name;
