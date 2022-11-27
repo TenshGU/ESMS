@@ -45,5 +45,4 @@ public class Edge {
             return 0;
         }
     }
-
 }
