@@ -8,15 +8,17 @@ import java.util.*;
 
 @Data
 public class Workflow extends ArrayList<Task> {
-    private double deadline = Double.MAX_VALUE;
     private int maxParallel;
+    private double factor; //1.0-2.0
+    private double deadline = Double.MAX_VALUE;
 
     //only used in reading DAX, simulate the data transfer from other job
     private HashMap<String, TransferData> transferData = new HashMap<>();
     private HashMap<String, Task> nameTaskMapping = new HashMap<>();
 
-    public Workflow(String file) {
+    public Workflow(String file, double factor) {
         super();
+        this.factor = factor;
         Task.resetInternalId();
         //readDAX
         try {
@@ -52,6 +54,8 @@ public class Workflow extends ArrayList<Task> {
         bind();
         //topological sort
         topoSort();
+        //calculate the value of tasks/WF
+        calTaskValue();
     }
 
     private void bind(){
@@ -128,6 +132,10 @@ public class Workflow extends ArrayList<Task> {
         }
 
         Collections.copy(this, topoList);
+    }
+
+    private void calTaskValue() {
+
     }
 
     //the DAXReader

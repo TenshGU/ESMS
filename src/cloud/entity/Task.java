@@ -11,6 +11,9 @@ public class Task {
     private int id;
     private String name;
     private double taskSize;
+    private int rank;
+    private long subDDL;
+
     private int topoCount;
     private double bLevel; 	//blevel
     private double tLevel;	//tLevel
