@@ -55,7 +55,8 @@ public class Workflow extends ArrayList<Task> {
         //topological sort
         topoSort();
         //calculate the value of tasks/WF
-        calTaskValue();
+        calDDL();
+        calSubDDL();
     }
 
     private void bind(){
@@ -134,8 +135,38 @@ public class Workflow extends ArrayList<Task> {
         Collections.copy(this, topoList);
     }
 
-    private void calTaskValue() {
+    private void calDDL() {
+        //calculate from the basis configuration
+        double speed = VM.ECU[VM.SLOWEST];
 
+        for(int j= this.size()-1; j>=0; j--) { //find the biggest value(that can decide whether the task have finished)
+            // review the handwriting paper
+            double bLevel = 0;
+            double sLevel = 0;
+            Task task = this.get(j);
+            for(Edge outEdge : task.getOutEdges()){
+                Task child = outEdge.getDestination();
+                bLevel = Math.max(bLevel, child.getBLevel() + (double) (outEdge.getDataSize() / VM.NETWORK_SPEED));
+                sLevel = Math.max(sLevel, child.getSLevel());
+            }
+            task.setBLevel(bLevel + task.getTaskSize() / speed); //rank(ti)
+            task.setSLevel(sLevel + task.getTaskSize() / speed);
+        }
+
+        this.deadline = this.get(0).getBLevel() * factor;
+    }
+
+    private void calSubDDL() {
+        double speed = VM.ECU[VM.SLOWEST];
+        double rankEntry = this.get(0).getBLevel();
+
+        for (int j = this.size()-2; j>0; j--) {
+            Task subTask = this.get(j);
+            double rank = subTask.getBLevel();
+            double ET = subTask.getTaskSize() / speed;
+            double sd = deadline * ((rankEntry - rank + ET) / rankEntry);
+            subTask.setSubDDL(sd);
+        }
     }
 
     //the DAXReader

@@ -1,10 +1,12 @@
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class Task {
     private static int internalId = 0;
 
@@ -12,7 +14,7 @@ public class Task {
     private String name;
     private double taskSize;
     private int rank;
-    private long subDDL;
+    private double subDDL;
 
     private int topoCount;
     private double bLevel; 	//blevel
@@ -63,4 +65,8 @@ public class Task {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Task [id=" + name + ", taskSize=" + taskSize + ", subDDL="+ subDDL +"]";
+    }
 }

@@ -1,5 +1,6 @@
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Comparator;
 import java.util.List;
@@ -7,7 +8,8 @@ import java.util.List;
 /**
  * use to represent the association between tasks
  */
-@Data
+@Getter
+@Setter
 public class Edge {
     private Task source;
     private Task destination;
