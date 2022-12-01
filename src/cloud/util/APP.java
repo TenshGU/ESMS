@@ -1,7 +1,11 @@
+import java.util.HashMap;
+
 public class APP {
     public static void main(String[] args) {
-        Workflow workflow = new Workflow("src/workflowSamples/MONTAGE/MONTAGE.n.50.0.dax", 1.0);
+        Workflow workflow = new Workflow("src/workflowSamples/MONTAGE/MONTAGE.n.100.0.dax", 2.0);
         Solution solution = new Solution();
-        CalHandler.calCE(workflow, solution);
+        HashMap<Task, Allocation> revMapping = solution.getRevMapping();
+        UWS uws = new UWS(workflow, solution, revMapping);
+        uws.run();
     }
 }

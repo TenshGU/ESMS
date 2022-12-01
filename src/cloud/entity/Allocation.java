@@ -11,6 +11,7 @@ public class Allocation {
     private double startTime;
     private double executeTime;
     private double finishTime;
+    private double laxity;
 
     public Allocation(Container container, Task task, double startTime) {
         this.container = container;

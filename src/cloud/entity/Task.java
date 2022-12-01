@@ -13,14 +13,16 @@ public class Task {
     private int id;
     private String name;
     private double taskSize;
-    private int rank;
+    private double rank;
+    private double urgency;
     private double subDDL;
 
     private int topoCount;
     private double bLevel; 	//blevel
-    private double tLevel;	//tLevel
     private double sLevel;
-    private double ALAP;
+    private double ve; //earlist happened
+    private double vl;
+    private int hop;
 
     private List<Edge> outEdges = new ArrayList<>();
     private List<Edge> inEdges = new ArrayList<>();
@@ -67,6 +69,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task [id=" + name + ", taskSize=" + taskSize + ", subDDL="+ subDDL +"]";
+        return "Task [id=" + name + ", taskSize=" + taskSize + ", subDDL="+ subDDL + ", urgency=" + urgency +"]";
     }
 }

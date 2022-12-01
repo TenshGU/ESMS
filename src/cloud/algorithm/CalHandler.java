@@ -1,7 +1,17 @@
-import java.util.HashMap;
+import java.util.*;
 
 public class CalHandler {
-    private static void firstAllocateTask(Workflow workflow, Solution solution) {
+    private static Workflow workflow;
+    private static Solution solution;
+    private static HashMap<Task, Allocation> revMapping;
+
+    public static void setCondition(Workflow workflow, Solution solution) {
+        CalHandler.workflow = workflow;
+        CalHandler.solution = solution;
+        revMapping = solution.getRevMapping();
+    }
+
+    private static void firstAllocateTask() {
         int wfLen = workflow.size();
         for (int j = 0; j < wfLen; j++) {
             Task task = workflow.get(j);
@@ -11,7 +21,7 @@ public class CalHandler {
         }
     }
 
-    private static void updateTaskConfig(Workflow workflow, Solution solution, Task task) {
+    private static void updateTaskConfig(Task task) {
         int index = workflow.indexOf(task);
         int size = workflow.size();
         for (int j = index; j < size; j++) {
@@ -20,11 +30,9 @@ public class CalHandler {
         }
     }
 
-    public static void calCE(Workflow workflow, Solution solution) {
-        firstAllocateTask(workflow, solution);
+    public static void calCE() {
+        firstAllocateTask();
         double deadline = workflow.getDeadline();
-        HashMap<Task, Allocation> revMapping = solution.getRevMapping();
-
         double cost = solution.calCost();
         double makespan = solution.calMakespan();
 
@@ -39,7 +47,7 @@ public class CalHandler {
                 Container container = alloc.getContainer();
 
                 container.increaseAmount();
-                updateTaskConfig(workflow, solution, task);
+                updateTaskConfig(task);
 
                 double gainj = 0.0;
                 double costj = solution.calCost();
@@ -59,12 +67,13 @@ public class CalHandler {
                 }
 
                 container.decreaseAmount();
-                updateTaskConfig(workflow, solution, task);
+                updateTaskConfig(task);
             }
             //It finds a CEj to update the container(the gainj is the biggest)
             if (c4update != null) {
                 c4update.increaseAmount();
-                updateTaskConfig(workflow, solution, t4update);
+                updateTaskConfig(t4update);
+                if (c4update.getECU() > VM.MAX_SPEED) VM.MAX_SPEED = c4update.getECU();
             }
             cost = solution.calCost();
             makespan = solution.calMakespan();
@@ -72,5 +81,30 @@ public class CalHandler {
             System.out.println("cost:" + cost);
             System.out.println("makespan:" + makespan);
         }
+    }
+
+    public static void calUrgency() {
+        for (Task task : workflow) {
+            double sd = task.getSubDDL();
+            double XFT = revMapping.get(task).getFinishTime();
+            int hop = workflow.calHop(task, revMapping);
+            task.setUrgency((sd - XFT) / hop);
+        }
+    }
+
+    public static List<Task> getSortedTaskList() {
+        List<Task> list = Arrays.asList(new Task[workflow.size()]);
+        Collections.copy(list, workflow);
+        list.sort((o1, o2) -> (int) (o1.getUrgency() - o2.getUrgency()));
+        return list;
+    }
+
+    public static double calLaxity(Task task) {
+        double EFT = revMapping.get(task).getFinishTime();
+        return task.getSubDDL() - EFT;
+    }
+
+    public static double calMinSpeed(Task task) {
+        return task.getTaskSize() / (task.getSubDDL() - VM.IMAGE_INIT_TIME);
     }
 }

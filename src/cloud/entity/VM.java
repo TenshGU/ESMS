@@ -8,6 +8,7 @@ import java.util.List;
 @Setter
 public class VM {
     private static int internalId = 0;
+    public static double MAX_SPEED = 6.5;
     public static final double LAUNCH_TIME = 0;
     public static final int SLOWEST = 0;
     public static final int FASTEST = 7;
@@ -17,6 +18,8 @@ public class VM {
     public static final double[] ECU = {6.5, 8, 13, 16, 26, 31, 53.5, 60};
     public static final double[] UNIT_COSTS = {0.1, 0.113, 0.2, 0.226, 0.4, 0.452, 0.8, 0.904};
     public static final double INTERVAL = 3600;	//one hour, billing interval
+    public static final double STARTUP_TIME = 135.29;
+    public static final double IMAGE_INIT_TIME = 97.31;
 
     private int id;
     private int type;

@@ -53,7 +53,7 @@ public class Workflow extends ArrayList<Task> {
         //add tasks to this workflow
         bind();
         //topological sort
-        topoSort();
+        selfTopoSort();
         //calculate the value of tasks/WF
         calDDL();
         calSubDDL();
@@ -96,20 +96,18 @@ public class Workflow extends ArrayList<Task> {
         }
     }
 
-    // convert the task list of workflow to a topological sort based on Kahn algorithm;
-    // besides, calculate maximal parallel number and sort edges for each task
-    private void topoSort(){
+    private List<Task> topoSort(Task entry) {
         // Empty list that will contain the sorted elements
         List<Task> topoList = new ArrayList<>();
         //Set of all nodes with no incoming edges
         PriorityQueue<Task> S = new PriorityQueue<Task>(10, new Task.ParallelComparator());
-        S.add(this.get(0));
+        S.add(entry);
 
         for(Task task : this)	//set topoCount to 0
             task.setTopoCount(0);
 
         this.maxParallel = -1;
-        while(S.size()>0){
+        while(S.size()>0) {
             maxParallel = Math.max(maxParallel, S.size());
             Task task = S.poll(); // remove a node n from S
             topoList.add(task);	// add n to tail of L
@@ -121,25 +119,64 @@ public class Workflow extends ArrayList<Task> {
                     S.add(t); // insert m into S
             }
         }
-        // It is a low bound and a larger one may exist
-        System.out.println("An approximate value for maximum parallel number: " + maxParallel);
 
         Edge.EdgeComparator ecForDestination = new Edge.EdgeComparator(true, topoList); //sort edges for each task
         Edge.EdgeComparator ecForSource = new Edge.EdgeComparator(false, topoList);
         //order every in/out edges belong to task by their index of topoSort(from samll to big)
-        for(Task t : this){
+        for(Task t : this) {
             Collections.sort(t.getInEdges(), ecForSource);
             Collections.sort(t.getOutEdges(), ecForDestination);
         }
+        return topoList;
+    }
 
-        Collections.copy(this, topoList);
+    private List<Task> reTopoSort(Task exit) {
+        // Empty list that will contain the sorted elements
+        List<Task> reTopoList = new ArrayList<>();
+        //Set of all nodes with no incoming edges
+        PriorityQueue<Task> S = new PriorityQueue<Task>(10, new Task.ParallelComparator());
+        S.add(exit);
+
+        for(Task task : this)	//set topoCount to 0
+            task.setTopoCount(0);
+
+        this.maxParallel = -1;
+        while(S.size()>0) {
+            maxParallel = Math.max(maxParallel, S.size());
+            Task task = S.poll(); // remove a node n from S
+            reTopoList.add(task);	// add n to tail of L
+            // for each node m with an edge e from n to m do
+            for(Edge e : task.getInEdges()) {
+                Task t = e.getSource();
+                t.setTopoCount(t.getTopoCount()+1);	//remove edge e from the graph--achieved by setting topoCount here
+                if(t.getTopoCount() == t.getOutEdges().size()) //if m has no other outcoming edges then
+                    S.add(t); // insert m into S
+            }
+        }
+
+        Edge.EdgeComparator ecForDestination = new Edge.EdgeComparator(true, reTopoList);
+        Edge.EdgeComparator ecForSource = new Edge.EdgeComparator(false, reTopoList);
+        //order every in/out edges belong to task by their index of topoSort(from samll to big)
+        for(Task t : this) {
+            Collections.sort(t.getOutEdges(), ecForDestination);
+            Collections.sort(t.getInEdges(), ecForSource);
+        }
+        return reTopoList;
+    }
+
+
+    // convert the task list of workflow to a topological sort based on Kahn algorithm;
+    // besides, calculate maximal parallel number and sort edges for each task
+    private void selfTopoSort(){
+        Task entry = this.get(0);
+        Collections.copy(this, this.topoSort(entry));
     }
 
     private void calDDL() {
         //calculate from the basis configuration
         double speed = VM.ECU[VM.SLOWEST];
 
-        for(int j= this.size()-1; j>=0; j--) { //find the biggest value(that can decide whether the task have finished)
+        for(int j=this.size()-1; j>=0; j--) { //find the biggest value(that can decide whether the task have finished)
             // review the handwriting paper
             double bLevel = 0;
             double sLevel = 0;
@@ -149,14 +186,70 @@ public class Workflow extends ArrayList<Task> {
                 bLevel = Math.max(bLevel, child.getBLevel() + (double) (outEdge.getDataSize() / VM.NETWORK_SPEED));
                 sLevel = Math.max(sLevel, child.getSLevel());
             }
-            task.setBLevel(bLevel + task.getTaskSize() / speed); //rank(ti)
-            task.setSLevel(sLevel + task.getTaskSize() / speed);
+            task.setBLevel(bLevel + (task.getTaskSize() / speed)); //rank(ti)
+            task.setSLevel(sLevel + (task.getTaskSize() / speed));
         }
 
         this.deadline = this.get(0).getBLevel() * factor;
     }
 
-    private void calSubDDL() {
+    public void calTaskRankBasedCE(HashMap<Task, Allocation> revMapping){
+        //calculate from the container configuration
+        for(int j= this.size()-1; j>=0; j--) { //find the biggest value(that can decide whether the task have finished)
+            // review the handwriting paper
+            double bLevel = 0;
+            double sLevel = 0;
+            Task task = this.get(j);
+            Allocation alloc = revMapping.get(task);
+            double speed = alloc.getContainer().getECU();
+            for(Edge outEdge : task.getOutEdges()) {
+                Task child = outEdge.getDestination();
+                bLevel = Math.max(bLevel, child.getBLevel() + (double) (outEdge.getDataSize() / VM.NETWORK_SPEED));
+                sLevel = Math.max(sLevel, child.getSLevel());
+            }
+            task.setRank(bLevel + task.getTaskSize() / speed);
+            task.setBLevel(bLevel + task.getTaskSize() / speed); //rank(ti)
+            task.setSLevel(sLevel + task.getTaskSize() / speed);
+        }
+    }
+
+    /*
+    the cp must be the one of the outEdges
+     */
+    public int calHop(Task entry, HashMap<Task, Allocation> revMapping) {
+        //calculate the ve
+        List<Task> topoList = topoSort(entry);
+        for (Task task : topoList) {
+            double ve = 0.0;
+            List<Edge> inEdges = task.getInEdges();
+            for (Edge edge : inEdges) {
+                double speed = revMapping.get(task).getContainer().getECU();
+                ve = Math.max(ve, edge.getSource().getVe() + (double) (edge.getDataSize() / VM.NETWORK_SPEED) + (task.getTaskSize() / speed));
+            }
+            task.setVe(ve);
+        }
+
+        //calculate the vl
+        List<Task> reTopoList = reTopoSort(entry);
+        for (Task task : reTopoList) {
+            double vl = task.getVe();
+            List<Edge> outEdges = task.getOutEdges();
+            for (Edge edge : outEdges) {
+                double speed = revMapping.get(task).getContainer().getECU();
+                vl = Math.min(vl, edge.getDestination().getVl() - ((double) (edge.getDataSize() / VM.NETWORK_SPEED) + (task.getTaskSize() / speed)));
+            }
+            task.setVl(vl);
+        }
+
+        int count = 0;
+        //find the task which ve = vl
+        for (Task task : topoList)
+            if (Math.abs(task.getVe() - task.getVl()) < 1e-6) count++;
+
+        return count == 0 ? 1 : count;
+    }
+
+    public void calSubDDL() {
         double speed = VM.ECU[VM.SLOWEST];
         double rankEntry = this.get(0).getBLevel();
 
