@@ -16,6 +16,11 @@ public class Container {
         this.VMType = VMType;
     }
 
+    public Container(int VMType, int amount) {
+        this.VMType = VMType;
+        this.amount = amount * 2;
+    }
+
     public void increaseAmount() {ECU_Unit += 0.5;}
 
     public void decreaseAmount() {ECU_Unit -= 0.5;}

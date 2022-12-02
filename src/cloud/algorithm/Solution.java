@@ -1,10 +1,16 @@
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
 /**
  * use to calculate something about allocation
  */
+@Getter
+@Setter
 public class Solution extends HashMap<Container, LinkedList<Allocation>> {
     private final HashMap<Task, Allocation> revMapping = new HashMap<>(); //reverseMapping
+    private final HashMap<Task, ArrayList<Container>> holdMapping = new HashMap<>();
 
     public Solution() {
         super();
@@ -159,9 +165,5 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
             }
         }
         return makespan;
-    }
-
-    public HashMap<Task, Allocation> getRevMapping() {
-        return revMapping;
     }
 }

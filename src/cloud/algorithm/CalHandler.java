@@ -4,18 +4,34 @@ public class CalHandler {
     private static Workflow workflow;
     private static Solution solution;
     private static HashMap<Task, Allocation> revMapping;
+    private static HashMap<Task, ArrayList<Container>> holdMapping = new HashMap<>();
 
     public static void setCondition(Workflow workflow, Solution solution) {
         CalHandler.workflow = workflow;
         CalHandler.solution = solution;
         revMapping = solution.getRevMapping();
+        holdMapping = solution.getHoldMapping();
     }
 
     private static void firstAllocateTask() {
         int wfLen = workflow.size();
         for (int j = 0; j < wfLen; j++) {
             Task task = workflow.get(j);
-            Container container = new Container(VM.SLOWEST);
+
+            Random random = new Random();
+            int nums = random.nextInt(5)+1;
+            ArrayList<Container> existList = holdMapping.get(task);
+            for (int k = 0; k < nums; k++) {
+                Container container = new Container(VM.SLOWEST, random.nextInt(1)+1);
+                if (existList == null) {
+                    existList = new ArrayList<>();
+                    holdMapping.put(task, existList);
+                }
+                existList.add(container);
+            }
+
+            Container container = existList.get(random.nextInt(nums)+1);
+
             double startTime = solution.calEST(task, container);
             solution.addTaskToContainer(container, task, startTime, j == wfLen - 1);
         }
@@ -99,12 +115,25 @@ public class CalHandler {
         return list;
     }
 
-    public static double calLaxity(Task task) {
-        double EFT = revMapping.get(task).getFinishTime();
-        return task.getSubDDL() - EFT;
+    public static double calLaxity(Task task, Container container) {
+        Allocation allocation = revMapping.get(task);
+        Container origin = revMapping.get(task).getContainer();
+        if (origin == container) {
+            double EFT = allocation.getFinishTime();
+            return task.getSubDDL() - EFT;
+        } else {
+            allocation.setContainer(container);
+            updateTaskConfig(task);
+            double EFT = allocation.getFinishTime();
+            return task.getSubDDL() - EFT;
+        }
     }
 
     public static double calMinSpeed(Task task) {
         return task.getTaskSize() / (task.getSubDDL() - VM.IMAGE_INIT_TIME);
+    }
+
+    public static void getMinEFTInstance() {
+
     }
 }
