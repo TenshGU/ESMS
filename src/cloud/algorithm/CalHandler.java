@@ -30,7 +30,7 @@ public class CalHandler {
                 existList.add(container);
             }
 
-            Container container = existList.get(random.nextInt(nums)+1);
+            Container container = existList.get(random.nextInt(nums));
 
             double startTime = solution.calEST(task, container);
             solution.addTaskToContainer(container, task, startTime, j == wfLen - 1);
@@ -115,25 +115,46 @@ public class CalHandler {
         return list;
     }
 
-    public static double calLaxity(Task task, Container container) {
+    public static void changeTaskContainer(Task task, Container container) {
         Allocation allocation = revMapping.get(task);
         Container origin = revMapping.get(task).getContainer();
-        if (origin == container) {
-            double EFT = allocation.getFinishTime();
-            return task.getSubDDL() - EFT;
-        } else {
+        if (origin != container) {
+            origin.setUsed(false);
+            container.setUsed(true);
             allocation.setContainer(container);
             updateTaskConfig(task);
-            double EFT = allocation.getFinishTime();
-            return task.getSubDDL() - EFT;
         }
+    }
+
+    //invoke the container replace, should be set the container to used
+    public static double calLaxity(Task task, Container container) {
+        changeTaskContainer(task, container);
+        Allocation allocation = revMapping.get(task);
+        double EFT = allocation.getFinishTime();
+        return task.getSubDDL() - EFT;
     }
 
     public static double calMinSpeed(Task task) {
         return task.getTaskSize() / (task.getSubDDL() - VM.IMAGE_INIT_TIME);
     }
 
-    public static void getMinEFTInstance() {
+    public static Container getMinEFTInstance(Task task) {
+        ArrayList<Container> containers = holdMapping.get(task);
+        double maxSpeed = Double.MIN_VALUE;
+        Container chosen = null;
+        for (Container container : containers) {
+            double ecu = container.getECU();
+            if (ecu > maxSpeed) {
+                maxSpeed = ecu;
+                chosen = container;
+            }
+        }
+        return chosen;
+    }
 
+    public static Container setMinEFTContainer2Task(Task task, Container c1, Container c2) {
+        Container chosen = c1.getECU() > c2.getECU() ? c1 : c2;
+        changeTaskContainer(task, chosen);
+        return chosen;
     }
 }

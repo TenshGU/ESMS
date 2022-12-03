@@ -4,7 +4,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 public class Allocation {
     private Task task;
     private Container container;

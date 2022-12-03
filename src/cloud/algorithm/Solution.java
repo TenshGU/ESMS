@@ -20,7 +20,7 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
     //isEnd denotes whether the task is placed at the end, or the beginning
     public void addTaskToContainer(Container container, Task task, double startTime, boolean isEnd) {
         if(!this.containsKey(container))
-            this.put(container, new LinkedList<Allocation>());
+            this.put(container, new LinkedList<>());
 
         Allocation alloc = new Allocation(container, task, startTime);
 
@@ -44,6 +44,7 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
             this.get(container).add(alloc);
         else
             this.get(container).add(0, alloc);
+        container.setUsed(true);
         revMapping.put(task, alloc);
     }
 
@@ -142,6 +143,7 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
     public double calCost() {
         double totalCost = 0;
         for(Container container : this.keySet()){
+            if (!container.isUsed()) continue;
             double containerCost = calContainerCost(container);
             totalCost += containerCost;
         }

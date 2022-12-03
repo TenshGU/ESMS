@@ -24,7 +24,7 @@ public class VM {
     private int id;
     private int type;
     private int DISCRETIZE_COUNT = 1;
-    private List<Integer> images = new ArrayList<>();
+    private List<Container> images = new ArrayList<>();
 
     public static void resetInternalId(){	//called by the constructor of Solution
         internalId = 0;

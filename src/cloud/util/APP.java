@@ -9,5 +9,7 @@ public class APP {
         HashMap<Task, ArrayList<Container>> holdMapping = solution.getHoldMapping();
         UWS uws = new UWS(workflow, solution, revMapping, holdMapping);
         uws.run();
+        System.out.println("makespan: " + solution.calMakespan());
+        System.out.println("cost: " + solution.calCost());
     }
 }
