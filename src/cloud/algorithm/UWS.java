@@ -1,7 +1,6 @@
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +16,10 @@ public class UWS {
     private Solution solution;
     private HashMap<Task, Allocation> revMapping;
     private HashMap<Task, ArrayList<Container>> holdMapping;
+    private List<VM> vms;
 
-    public void run() {
-        CalHandler.setCondition(workflow, solution);
+    public List<Container> run() {
+        CalHandler.setCondition(workflow, solution, vms);
         CalHandler.calCE();
         //cal rank and subDDL
         workflow.calTaskRankBasedCE(revMapping);
@@ -64,9 +64,10 @@ public class UWS {
                     CalHandler.changeTaskContainer(task, c1);
                 }
             }
-            newIns.add(chosen);
+            assert chosen != null;
+            boolean fitSuccess = Fitter.bestFit(vms, chosen);
+            if (!fitSuccess) newIns.add(chosen);
         }
-
-
+        return newIns;
     }
 }

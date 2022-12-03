@@ -3,12 +3,14 @@ import java.util.*;
 public class CalHandler {
     private static Workflow workflow;
     private static Solution solution;
+    private static List<VM> vms;
     private static HashMap<Task, Allocation> revMapping;
     private static HashMap<Task, ArrayList<Container>> holdMapping = new HashMap<>();
 
-    public static void setCondition(Workflow workflow, Solution solution) {
+    public static void setCondition(Workflow workflow, Solution solution, List<VM> vms) {
         CalHandler.workflow = workflow;
         CalHandler.solution = solution;
+        CalHandler.vms = vms;
         revMapping = solution.getRevMapping();
         holdMapping = solution.getHoldMapping();
     }
@@ -29,11 +31,14 @@ public class CalHandler {
                 }
                 existList.add(container);
             }
-
             Container container = existList.get(random.nextInt(nums));
-
             double startTime = solution.calEST(task, container);
             solution.addTaskToContainer(container, task, startTime, j == wfLen - 1);
+
+            if (random.nextInt(6) < 3) {
+                List<Container> images = vms.get(random.nextInt(VM.TYPE_NO)).getImages();
+                images.add(container);
+            }
         }
     }
 
@@ -156,5 +161,9 @@ public class CalHandler {
         Container chosen = c1.getECU() > c2.getECU() ? c1 : c2;
         changeTaskContainer(task, chosen);
         return chosen;
+    }
+
+    public static double calTotalCost() {
+        return 0;
     }
 }

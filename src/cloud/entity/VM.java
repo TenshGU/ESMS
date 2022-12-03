@@ -24,6 +24,8 @@ public class VM {
     private int id;
     private int type;
     private int DISCRETIZE_COUNT = 1;
+    private double ecu;
+    private double residueECU;
     private List<Container> images = new ArrayList<>();
 
     public static void resetInternalId(){	//called by the constructor of Solution
@@ -32,6 +34,8 @@ public class VM {
 
     public VM(int type){
         this.type = type;
+        this.ecu = ECU[type];
+        this.residueECU = this.ecu;
         this.id = internalId++;
     }
 

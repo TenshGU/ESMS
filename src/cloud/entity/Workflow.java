@@ -331,7 +331,6 @@ public class Workflow extends ArrayList<Task> {
 
         public void addDestination(Task t){destinations.add(t);}
     }
-
 }
 
 
