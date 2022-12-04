@@ -1,12 +1,13 @@
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
 
 @Getter
 @Setter
-public class VM {
+public class VM implements Serializable {
+    private static final long serialVersionUID = 1713133041297230697L;
     private static int internalId = 0;
     public static double MAX_SPEED = 6.5;
     public static final double LAUNCH_TIME = 0;
@@ -20,6 +21,7 @@ public class VM {
     public static final double INTERVAL = 3600;	//one hour, billing interval
     public static final double STARTUP_TIME = 135.29;
     public static final double IMAGE_INIT_TIME = 97.31;
+    public static double finalCost = 0.0;
 
     private int id;
     private int type;
@@ -27,6 +29,7 @@ public class VM {
     private double ecu;
     private double residueECU;
     private List<Container> images = new ArrayList<>();
+    private List<Container> loadedContainer = new ArrayList<>();
 
     public static void resetInternalId(){	//called by the constructor of Solution
         internalId = 0;
@@ -44,6 +47,6 @@ public class VM {
 
     @Override
     public String toString() {
-        return "VM [id=" + id + ", type=" + type + "]";
+        return "VM [id=" + id + ", type=" + type + ", ECU: " + ecu + ", Price: " + getUnitCost() + ", " + loadedContainer;
     }
 }

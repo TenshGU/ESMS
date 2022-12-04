@@ -56,19 +56,6 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
         alloc.setFinishTime(newFinishTime);
     }
 
-    //update the finish time of each allocation
-    /*public void updateVM(VM vm) {
-        vm.setType(vm.getType()+1);
-
-        LinkedList<Allocation> list = this.get(vm);
-        if(list == null)
-            return;
-        for(Allocation alloc : list){
-            double newFinishTime = alloc.getTask().getTaskSize() / vm.getECU() + alloc.getStartTime();
-            alloc.setFinishTime(newFinishTime);
-        }
-    }*/
-
     //calculate Earliest Starting Time(EST) of task on Container
     public double calEST(Task task, Container container) {
         double EST = 0;

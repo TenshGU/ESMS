@@ -1,9 +1,8 @@
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+
+import java.util.*;
 
 /**
  * Urgency-Based WorkFlow Scheduling
@@ -17,10 +16,17 @@ public class UWS {
     private HashMap<Task, Allocation> revMapping;
     private HashMap<Task, ArrayList<Container>> holdMapping;
     private List<VM> vms;
+    private Configuration conf;
 
-    public List<Container> run() {
+    public List<Container> execute() {
         CalHandler.setCondition(workflow, solution, vms);
         CalHandler.calCE();
+
+        System.out.println("---------------------------------------------------------------");
+        System.out.println("After CE, it's makespan is: " + solution.calMakespan());
+        System.out.println("After CE, it's cost is: " + solution.calCost());
+        System.out.println("---------------------------------------------------------------");
+
         //cal rank and subDDL
         workflow.calTaskRankBasedCE(revMapping);
         workflow.calSubDDL();
@@ -65,8 +71,9 @@ public class UWS {
                 }
             }
             assert chosen != null;
-            boolean fitSuccess = Fitter.bestFit(vms, chosen);
-            if (!fitSuccess) newIns.add(chosen);
+            VM vm = Fitter.bestFit(vms, chosen, false);
+            if (vm == null) newIns.add(chosen);
+            else conf.addVM(vm);
         }
         return newIns;
     }

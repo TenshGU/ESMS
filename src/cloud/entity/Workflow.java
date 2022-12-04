@@ -89,8 +89,8 @@ public class Workflow extends ArrayList<Task> {
                     e.setDataSize(td.getSize());
                     source.insertOutEdge(e);
                     destination.insertInEdge(e);
-                    System.out.println("**************add a control flow*******************source: "
-                            +e.getSource().getName()+"; destination: "+e.getDestination().getName());
+                    /*System.out.println("**************add a control flow*******************source: "
+                            +e.getSource().getName()+"; destination: "+e.getDestination().getName());*/
                 }
             }
         }

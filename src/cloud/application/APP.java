@@ -9,14 +9,16 @@ public class APP {
         HashMap<Task, Allocation> revMapping = solution.getRevMapping();
         HashMap<Task, ArrayList<Container>> holdMapping = solution.getHoldMapping();
         List<VM> vms = Initializer.initVMSet();
+        Configuration conf = new Configuration(workflow, solution);
 
-        UWS uws = new UWS(workflow, solution, revMapping, holdMapping, vms);
-        List<Container> newIns = uws.run();
+        UWS uws = new UWS(workflow, solution, revMapping, holdMapping, vms, conf);
+        List<Container> newIns = uws.execute();
+        System.out.println("After UWS, the number of instances that have not been allocated is: " + newIns.size());
+        System.out.println("---------------------------------------------------------------");
 
-        IFFD iffd = new IFFD(newIns, vms);
-        iffd.run();
+        IFFD iffd = new IFFD(newIns, vms, conf);
+        iffd.execute();
 
-        System.out.println("makespan: " + solution.calMakespan());
-        System.out.println("cost: " + solution.calCost());
+        conf.printMsg();
     }
 }

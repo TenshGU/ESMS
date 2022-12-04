@@ -23,22 +23,25 @@ public class CalHandler {
             Random random = new Random();
             int nums = random.nextInt(5)+1;
             ArrayList<Container> existList = holdMapping.get(task);
+
+            //create many microservice
             for (int k = 0; k < nums; k++) {
-                Container container = new Container(VM.SLOWEST, random.nextInt(1)+1);
+                Container container = new Container(VM.SLOWEST);
                 if (existList == null) {
                     existList = new ArrayList<>();
                     holdMapping.put(task, existList);
                 }
                 existList.add(container);
             }
+
+            //choose one to take the task
             Container container = existList.get(random.nextInt(nums));
+            container.setUsed(true);
             double startTime = solution.calEST(task, container);
             solution.addTaskToContainer(container, task, startTime, j == wfLen - 1);
 
-            if (random.nextInt(6) < 3) {
-                List<Container> images = vms.get(random.nextInt(VM.TYPE_NO)).getImages();
-                images.add(container);
-            }
+            //whether the existed vm load the image
+            if (random.nextInt(6) < 3) vms.get(random.nextInt(VM.TYPE_NO)).getImages().add(container);
         }
     }
 
@@ -53,11 +56,13 @@ public class CalHandler {
 
     public static void calCE() {
         firstAllocateTask();
+
         double deadline = workflow.getDeadline();
         double cost = solution.calCost();
         double makespan = solution.calMakespan();
 
         System.out.println("Workflow's deadline: " + deadline);
+        System.out.println("first makespan based on first configuration: " + makespan);
 
         while (makespan > deadline) {
             double gain = 0.0; //current biggest gain
@@ -67,7 +72,7 @@ public class CalHandler {
                 Allocation alloc = revMapping.get(task);
                 Container container = alloc.getContainer();
 
-                container.increaseAmount();
+                container.increaseECU();
                 updateTaskConfig(task);
 
                 double gainj = 0.0;
@@ -87,20 +92,21 @@ public class CalHandler {
                     gain = gainj;
                 }
 
-                container.decreaseAmount();
+                container.decreaseECU();
                 updateTaskConfig(task);
             }
             //It finds a CEj to update the container(the gainj is the biggest)
             if (c4update != null) {
-                c4update.increaseAmount();
+                c4update.increaseECU();
                 updateTaskConfig(t4update);
-                if (c4update.getECU() > VM.MAX_SPEED) VM.MAX_SPEED = c4update.getECU();
+                if (c4update.getECU() > VM.MAX_SPEED || Math.abs(c4update.getECU() - VM.MAX_SPEED) < 1e-6)
+                    VM.MAX_SPEED = c4update.getECU();
             }
             cost = solution.calCost();
             makespan = solution.calMakespan();
 
-            System.out.println("cost:" + cost);
-            System.out.println("makespan:" + makespan);
+            /*System.out.println("cost:" + cost);
+            System.out.println("makespan:" + makespan);*/
         }
     }
 
@@ -143,6 +149,12 @@ public class CalHandler {
         return task.getTaskSize() / (task.getSubDDL() - VM.IMAGE_INIT_TIME);
     }
 
+    public static double calTotalCost(Set<VM> vmSet) {
+        double cost = 0.0;
+        for (VM vm : vmSet) cost += vm.getUnitCost();
+        return cost;
+    }
+
     public static Container getMinEFTInstance(Task task) {
         ArrayList<Container> containers = holdMapping.get(task);
         double maxSpeed = Double.MIN_VALUE;
@@ -163,7 +175,9 @@ public class CalHandler {
         return chosen;
     }
 
-    public static double calTotalCost() {
-        return 0;
+    public static List<Container> getLatestVMsContainer(HashMap<VM, List<Container>> fitMapping) {
+        List<Container> map = null;
+        for (Map.Entry<VM, List<Container>> entry : fitMapping.entrySet()) map = entry.getValue();
+        return map;
     }
 }
