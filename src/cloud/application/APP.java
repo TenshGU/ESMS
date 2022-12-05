@@ -4,7 +4,9 @@ import java.util.List;
 
 public class APP {
     public static void main(String[] args) {
-        Workflow workflow = new Workflow("src/workflowSamples/MONTAGE/MONTAGE.n.100.0.dax", 1.3);
+        double factor = 1.3;
+        System.out.println("factor: " + factor);
+        Workflow workflow = new Workflow("src/workflowSamples/Montage/Montage.n.100.0.dax", factor);
         Solution solution = new Solution();
         HashMap<Task, Allocation> revMapping = solution.getRevMapping();
         HashMap<Task, ArrayList<Container>> holdMapping = solution.getHoldMapping();

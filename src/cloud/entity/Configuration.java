@@ -8,6 +8,7 @@ import java.util.*;
 public class Configuration {
      private List<VM> vms = new ArrayList<>();
      private double successRatio = -1;
+     private int[] count;
      private Solution solution;
      private Workflow workflow;
 
@@ -44,9 +45,18 @@ public class Configuration {
         return successRatio;
     }
 
+    public int[] getCount() {
+         if (count != null) return count;
+         count = new int[VM.TYPE_NO];
+         for (VM vm : vms) count[vm.getType()]++;
+         return count;
+    }
+
      public void printMsg() {
          System.out.println("total VM's number is: " + vms.size());
          System.out.println("ESMS final cost is: " + calTotalCost());
+         int[] count = getCount();
+         for (int i=0; i<VM.TYPE_NO; i++) System.out.println("VM's type: " + i + ", has: " + count[i]);
          System.out.println("ESMS success ratio is: " + calSuccessRatio());
          System.out.println("ESMS Configuration is: \n" + vms);
      }
