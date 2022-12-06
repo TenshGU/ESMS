@@ -4,7 +4,7 @@ import java.util.List;
 
 public class APP {
     public static void main(String[] args) {
-        double factor = 1.3;
+        double factor = 1.8;
         System.out.println("factor: " + factor);
         Workflow workflow = new Workflow("src/workflowSamples/Montage/Montage.n.100.0.dax", factor);
         Solution solution = new Solution();

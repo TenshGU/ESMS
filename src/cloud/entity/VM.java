@@ -21,7 +21,6 @@ public class VM implements Serializable {
     public static final double INTERVAL = 3600;	//one hour, billing interval
     public static final double STARTUP_TIME = 135.29;
     public static final double IMAGE_INIT_TIME = 97.31;
-    public static double finalCost = 0.0;
 
     private int id;
     private int type;

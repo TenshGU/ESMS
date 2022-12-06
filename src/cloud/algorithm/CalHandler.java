@@ -58,7 +58,7 @@ public class CalHandler {
         firstAllocateTask();
 
         double deadline = workflow.getDeadline();
-        double cost = solution.calCost();
+        double cost = solution.calCost(true);
         double makespan = solution.calMakespan();
 
         System.out.println("Workflow's deadline: " + deadline);
@@ -76,7 +76,7 @@ public class CalHandler {
                 updateTaskConfig(task);
 
                 double gainj = 0.0;
-                double costj = solution.calCost();
+                double costj = solution.calCost(true);
                 double makespanj = solution.calMakespan();
 
                 if (Math.abs(cost - costj) < 1e-6) {
@@ -102,7 +102,7 @@ public class CalHandler {
                 if (c4update.getECU() > VM.MAX_SPEED || Math.abs(c4update.getECU() - VM.MAX_SPEED) < 1e-6)
                     VM.MAX_SPEED = c4update.getECU();
             }
-            cost = solution.calCost();
+            cost = solution.calCost(true);
             makespan = solution.calMakespan();
 
             /*System.out.println("cost:" + cost);

@@ -24,7 +24,8 @@ public class UWS {
 
         System.out.println("---------------------------------------------------------------");
         System.out.println("After CE, it's makespan is: " + solution.calMakespan());
-        System.out.println("After CE, it's cost is: " + solution.calCost());
+        System.out.println("After CE, it's cost(by single fit) is: " + solution.calCost(false));
+        System.out.println("After CE, it's cost(by ratio, do not consider VM's basic resource) is: " + solution.calCost(true));
         System.out.println("---------------------------------------------------------------");
 
         //cal rank and subDDL
@@ -45,7 +46,7 @@ public class UWS {
                 double laxity = CalHandler.calLaxity(task, container);
                 if (laxity < 0) laxityNeg = true;
                 else {
-                    double currentCost = solution.calCost();
+                    double currentCost = solution.calCost(true);
                     if (incrCost > currentCost) { //minimum incrCost
                         incrCost = currentCost;
                         chosen = container;

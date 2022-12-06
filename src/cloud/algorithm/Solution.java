@@ -126,17 +126,22 @@ public class Solution extends HashMap<Container, LinkedList<Allocation>> {
         }
     }
 
-    public double calCost() {
+    public double calCost(boolean flag) {
         double totalCost = 0;
         for(Container container : this.keySet()){
             if (!container.isUsed()) continue;
-            double containerCost = calContainerCost(container);
+            double containerCost = flag ? calContainerCostByRatio(container) :calContainerCostBySF(container);
             totalCost += containerCost;
         }
         return totalCost;
     }
 
-    public double calContainerCost(Container container) {
+    private double calContainerCostBySF(Container container) {
+        return container.getVMCostSingleFit() * Math.ceil((this.getContainerLeaseEndTime(container) - this.getContainerLeaseStartTime(container)) / VM.INTERVAL);
+    }
+
+
+    private double calContainerCostByRatio(Container container) {
         return container.getUnitCost() * Math.ceil((this.getContainerLeaseEndTime(container) - this.getContainerLeaseStartTime(container)) / VM.INTERVAL);
     }
 

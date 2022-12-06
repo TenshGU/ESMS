@@ -34,6 +34,9 @@ public class Container implements Serializable {
         return ECU_Unit;
     }
 
+    public double getVMCostSingleFit() {
+        return VM.ECU[VMType] * VM.UNIT_COSTS[VMType];
+    }
     public double getUnitCost() {
         return (getECU() / VM.ECU[VMType]) * VM.UNIT_COSTS[VMType];
     }
