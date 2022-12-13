@@ -1,12 +1,20 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 public class APP {
     public static void main(String[] args) {
-        double factor = 1.8;
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("please input your DAX file's path:"); // src/workflowSamples/Montage/Montage.n.100.0.dax
+        String path = scanner.next();
+        System.out.print("please input the factor:");
+        double factor = scanner.nextDouble();
+        System.out.println("---------------------------------------------------------------");
+
+
         System.out.println("factor: " + factor);
-        Workflow workflow = new Workflow("src/workflowSamples/Montage/Montage.n.100.0.dax", factor);
+        Workflow workflow = new Workflow(path, factor);
         Solution solution = new Solution();
         HashMap<Task, Allocation> revMapping = solution.getRevMapping();
         HashMap<Task, ArrayList<Container>> holdMapping = solution.getHoldMapping();
